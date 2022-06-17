@@ -1,7 +1,8 @@
 import 'dart:io';
 
 import 'package:firstflutter/homepage.dart';
-import 'package:flutter/cupertino.dart';
+import 'package:firstflutter/http/http.dart';
+import 'package:firstflutter/weatherpage.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:fluttertoast/fluttertoast.dart';
@@ -17,14 +18,12 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-
     if (Platform.isAndroid) {
       // 以下两行 设置android状态栏为透明的沉浸。写在组件渲染之后，是为了在渲染后进行set赋值，覆盖状态栏，写在渲染之前MaterialApp组件会覆盖掉这个值。
       SystemUiOverlayStyle systemUiOverlayStyle =
-      const SystemUiOverlayStyle(statusBarColor: Colors.transparent);
+          const SystemUiOverlayStyle(statusBarColor: Colors.transparent);
       SystemChrome.setSystemUIOverlayStyle(systemUiOverlayStyle);
     }
-
 
     return MaterialApp(
       title: 'Flutter Demo',
@@ -135,6 +134,21 @@ class _MyHomePageState extends State<MyHomePage> {
                 child: CircularImage(),
               ),
             ),
+            MaterialButton(
+                onPressed: () {
+                 /// toast('dio 网络请求');
+                  dioGet(context);
+                },
+                child: const Text('MaterialButton')),
+
+            MaterialButton(
+                onPressed: () {
+                  Navigator.push(context,
+                      MaterialPageRoute(builder: (BuildContext context) {
+                        return const WeatherPage();
+                      }));
+                },
+                child: const Text('查询上海天气')),
           ],
         ),
       ),
@@ -175,22 +189,6 @@ void toast(String mag) {
       fontSize: 16.0);
 }
 
-class ListDataView extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return ListView(
-      scrollDirection: Axis.vertical,
-      children: <Widget>[
-        Image.network(
-          'https://ss2.bdstatic.com/70cFvnSh_Q1YnxGkpoWK1HF6hhy/it/u=2219902027,2497484543&fm=26&gp=0.jpg',
-        ),
-        Image.network(
-          'https://ss2.bdstatic.com/70cFvnSh_Q1YnxGkpoWK1HF6hhy/it/u=2219902027,2497484543&fm=26&gp=0.jpg',
-        ),
-        Image.network(
-          'https://ss2.bdstatic.com/70cFvnSh_Q1YnxGkpoWK1HF6hhy/it/u=2219902027,2497484543&fm=26&gp=0.jpg',
-        ),
-      ],
-    );
-  }
+void isolate() {
+  /// Isolate.spawn((message) { }, message)
 }

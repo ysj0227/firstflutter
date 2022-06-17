@@ -81,7 +81,7 @@ class _HomePageState extends State<HomePage> {
       onTap: () {
         showAlertDialog(context,index);
       },
-      onLongPress: () => print("$index 长按了"),
+      onLongPress: () => print("$index 长按了 "),
     );
   }
 
