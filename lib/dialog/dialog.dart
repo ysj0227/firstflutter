@@ -20,7 +20,6 @@ showAlertDialog(BuildContext context, String msg) {
 
   //设置对话框
   AlertDialog alert = AlertDialog(
-
     title: const Text("AlertDialog"),
     // content: Text(msg),
     content: SingleChildScrollView(
@@ -40,4 +39,27 @@ showAlertDialog(BuildContext context, String msg) {
       return alert;
     },
   );
+}
+
+showCusDialog(BuildContext context, String msg) {
+  Widget buttonCancel = TextButton(
+      onPressed: () {
+        Navigator.of(context).pop();
+      },
+      child: const Text('取消'));
+  Widget buttonConfirm = TextButton(
+      onPressed: () {
+        Navigator.of(context).pop();
+      },
+      child: const Text('确定'));
+
+  showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text("AlertDialog"),
+          content: Text(msg),
+          actions: [buttonCancel, buttonConfirm],
+        );
+      });
 }

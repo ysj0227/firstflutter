@@ -1,13 +1,21 @@
 import 'dart:io';
 
+import 'package:device_info_plus/device_info_plus.dart';
 import 'package:firstflutter/homepage.dart';
 import 'package:firstflutter/http/http.dart';
+import 'package:firstflutter/utils.dart';
 import 'package:firstflutter/weatherpage.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_swiper_plus/flutter_swiper_plus.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:get/get.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
+import 'dialog/dialog.dart';
 import 'login.dart';
+
+/// https://www.jianshu.com/p/8100be0413ae   代码规范
 
 void main() {
   runApp(const MyApp());
@@ -30,7 +38,7 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
-      home: const MyHomePage(title: 'Flutter Demo Home Page'),
+      home: const MyHomePage(title: 'Flutter Home Page'),
     );
   }
 }
@@ -44,13 +52,69 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  int _counter = 0;
+  DeviceInfoPlugin deviceInfoPlugin = DeviceInfoPlugin();
+  Map<String, dynamic> _deviceData = <String, dynamic>{};
 
-  void _incrementCounter() {
+  Future<void> initPlatformState() async {
+    var deviceData = <String, dynamic>{};
+    try {
+      if (Platform.isAndroid) {
+        deviceData = _readAndroidBuildData(await deviceInfoPlugin.androidInfo);
+
+        print('deviceData=   $deviceData');
+      }
+    } on PlatformException {
+      deviceData = <String, dynamic>{
+        'Error:': 'Failed to get platform version.'
+      };
+    }
+
+    if (!mounted) return;
+
     setState(() {
-      _counter++;
-      push();
+      _deviceData = deviceData;
     });
+  }
+
+  Map<String, dynamic> _readAndroidBuildData(AndroidDeviceInfo build) {
+    return <String, dynamic>{
+      'version.securityPatch': build.version.securityPatch,
+      'version.sdkInt': build.version.sdkInt,
+      'version.baseOS': build.version.baseOS,
+      'board': build.board,
+      'brand': build.brand,
+      'device': build.device,
+      'id': build.id,
+      'androidId': build.androidId,
+      'manufacturer': build.manufacturer,
+      'model': build.model,
+    };
+  }
+
+  ///本地数据
+  final Future<SharedPreferences> _prefs = SharedPreferences.getInstance();
+  late Future<int> _counter;
+
+  Future<void> _DBCounter() async {
+    final SharedPreferences prefs = await _prefs;
+    final int counter = (prefs.getInt('counter') ?? 0) + 1;
+    print('save=   $counter');
+
+    setState(() {
+      _counter = prefs.setInt('counter', counter).then((bool success) {
+        return counter;
+      });
+    });
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _counter = _prefs.then((SharedPreferences prefs) {
+      return prefs.getInt('counter') ?? 0;
+    });
+
+    initPlatformState();
   }
 
   void _toUi() {
@@ -60,104 +124,135 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   void push() {
-    // Navigator.push<String>(
-    //     context, MaterialPageRoute(builder: (context) => const LoginPage()));
-
     var nav = Navigator.push(context,
         MaterialPageRoute(builder: (BuildContext context) {
       return LoginPage(title: 'Today is nice');
     }));
 
     //回调参数接收
-    nav.then((val) => {
-          toast(val)
-
-          // print(val)
-        });
+    nav.then((val) => {toast(val)});
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(widget.title),
-      ),
-      body: Align(
-        alignment: Alignment.topCenter,
-        // body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            const Text('Click Right Button'),
-            Text(
-              '$_counter',
-              style: Theme.of(context).textTheme.headline4,
-            ),
-            TextButton(onPressed: _toUi, child: const Text('TextButton')),
-            Container(
-                padding: const EdgeInsets.all(10.0),
-                child: Column(
-                  children: const <Widget>[
-                    Text('Start Tool Call'),
-                    Text('Start Tool Call'),
-                  ],
-                )),
-            Container(
-                padding: const EdgeInsets.all(10.0),
-                child: Row(
-                  children: const <Widget>[
-                    Text('Different Between Colors  '),
-                    Text('Different Between Colors'),
-                  ],
-                )),
-            Container(
-              padding: const EdgeInsets.all(10.0),
-              width: 80.0,
-              height: 80.0,
-              child: Image.asset(
-                'images/ic_head_default.png',
-                fit: BoxFit.cover,
-              ),
-            ),
-            Container(
-              padding: const EdgeInsets.all(10.0),
-              width: 80.0,
-              height: 80.0,
-              // child: CircularImage(),
-              child: GestureDetector(
-                onTap: () {
-                  Navigator.push(context,
-                      MaterialPageRoute(builder: (BuildContext context) {
-                    return const HomePage();
-                  }));
-                },
-                child: CircularImage(),
-              ),
-            ),
-            MaterialButton(
-                onPressed: () {
-                 /// toast('dio 网络请求');
-                  dioGet(context);
-                },
-                child: const Text('MaterialButton')),
-
-            MaterialButton(
-                onPressed: () {
-                  Navigator.push(context,
-                      MaterialPageRoute(builder: (BuildContext context) {
-                        return const WeatherPage();
+    // return Scaffold(
+    return GetMaterialApp(
+        title: "GetX",
+        home: Scaffold(
+          appBar: AppBar(
+            title: Text(widget.title),
+          ),
+          bottomNavigationBar: _bottomNavigationBar(),
+          body: Align(
+            alignment: Alignment.topCenter,
+            child: Column(
+              children: <Widget>[
+                SizedBox(
+                  width: double.infinity,
+                  child: AspectRatio(
+                    aspectRatio: 16 / 9,
+                    child: Swiper(
+                      itemCount: bannerList().length,
+                      itemBuilder: (BuildContext context, int index) {
+                        return Image.network(
+                          bannerList()[index]["url"],
+                          fit: BoxFit.cover,
+                        );
+                      },
+                      pagination: const SwiperPagination(),
+                    ),
+                  ),
+                ),
+                TextButton(
+                    onPressed: _toUi, child: const Text('TextButton Login')),
+                Container(
+                    padding: const EdgeInsets.all(10.0),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      children: <Widget>[
+                        TextButton(
+                            onPressed: () {
+                              _DBCounter();
+                            },
+                            child: const Text('轻量级数据保存')),
+                        FutureBuilder<int>(
+                          future: _counter,
+                          builder:
+                              (BuildContext context, AsyncSnapshot snapshot) {
+                            if (snapshot.connectionState ==
+                                ConnectionState.done) {
+                              if (snapshot.hasError) {
+                                return Text("Error:${snapshot.error}"); //失败
+                              } else {
+                                return Text("Contents：${snapshot.data}");
+                              }
+                            } else {
+                              return const CircularProgressIndicator();
+                            }
+                          },
+                        ),
+                      ],
+                    )),
+                MaterialButton(
+                  onPressed: () {
+                    showCusDialog(context, _deviceData.toString());
+                  },
+                  child: Text(
+                    '设备信息：${_deviceData.toString()}',
+                    style: const TextStyle(color: Colors.blue),
+                  ),
+                ),
+                Container(
+                  padding: const EdgeInsets.all(10.0),
+                  width: 80.0,
+                  height: 80.0,
+                  // child: CircularImage(),
+                  child: GestureDetector(
+                    onTap: () {
+                      Navigator.push(context,
+                          MaterialPageRoute(builder: (BuildContext context) {
+                        return const HomePage();
                       }));
-                },
-                child: const Text('查询上海天气')),
-          ],
-        ),
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _incrementCounter,
-        tooltip: 'Increment',
-        child: const Icon(Icons.add),
-      ),
-    );
+                    },
+                    child: CircularImage(),
+                  ),
+                ),
+                Container(
+                  alignment: Alignment.center,
+                  child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      children: <Widget>[
+                        const Icon(
+                          Icons.widgets,
+                          color: Colors.orange,
+                        ),
+                        MaterialButton(
+                            onPressed: () {
+                              dioGet(context);
+                            },
+                            child: const Text('网络请求数据')),
+                        MaterialButton(
+                            onPressed: () {
+                              Navigator.push(context, MaterialPageRoute(
+                                  builder: (BuildContext context) {
+                                return const WeatherPage();
+                              }));
+                            },
+                            child: const Text('查询天气')),
+                        ElevatedButton(
+                            onPressed: () => getXDialog(context),
+                            child: const Text('GetX弹框')),
+                      ]),
+                ),
+                MaterialButton(
+                    onPressed: () {
+
+                    },
+                    child: const Text('数据库')),
+              ],
+            ),
+          ),
+        ));
   }
 }
 
@@ -189,6 +284,57 @@ void toast(String mag) {
       fontSize: 16.0);
 }
 
-void isolate() {
-  /// Isolate.spawn((message) { }, message)
+BottomNavigationBar _bottomNavigationBar() {
+  return BottomNavigationBar(
+    items: const [
+      BottomNavigationBarItem(
+        icon: Icon(Icons.home),
+        label: 'home',
+      ),
+      BottomNavigationBarItem(
+        icon: Icon(Icons.favorite),
+        label: 'favorite',
+      ),
+      BottomNavigationBarItem(
+        icon: Icon(Icons.accessible),
+        label: 'accessible',
+      ),
+    ],
+    onTap: (index) {
+      toast('点击$index');
+    },
+  );
+}
+
+void getXDialog(BuildContext context) {
+  Get.defaultDialog(
+    title: "Get Dialog",
+    middleText: "FlutterDevs is a protruding flutter app development company",
+    backgroundColor: Colors.white,
+    titleStyle: const TextStyle(color: Colors.blue),
+    middleTextStyle: const TextStyle(color: Colors.blue),
+    radius: 10.0,
+    cancel: MaterialButton(
+      onPressed: () {
+        Navigator.of(context).pop();
+        // Get.back();
+      },
+      color: Colors.blue,
+      child: const Text(
+        "cancel",
+        style: TextStyle(color: Colors.white),
+      ),
+    ),
+    confirm: MaterialButton(
+      onPressed: () {
+        Navigator.of(context).pop();
+        // Get.back();
+      },
+      color: Colors.blue,
+      child: const Text(
+        "confirm",
+        style: TextStyle(color: Colors.white),
+      ),
+    ),
+  );
 }
