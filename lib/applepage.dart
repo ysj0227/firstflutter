@@ -2,8 +2,6 @@ import 'package:firstflutter/db/fruitProvider.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import 'db/fruit.dart';
-
 class ApplePage extends StatefulWidget {
   const ApplePage({Key? key}) : super(key: key);
 
@@ -52,8 +50,7 @@ class ApplePageState extends State<ApplePage> {
                   ),
                 ),
               ),
-              Container(
-                padding: const EdgeInsets.only(top: 10.0),
+              SizedBox(
                 width: 340.0,
                 height: 62.0,
                 child: MaterialButton(
