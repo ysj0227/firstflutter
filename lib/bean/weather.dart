@@ -6,18 +6,18 @@ class Weather {
   Weather({this.data, this.status, this.desc});
 
   Weather.fromJson(Map<String, dynamic> json) {
-    data = json['data'] != null ? new Data.fromJson(json['data']) : null;
+    data = json['data'] != null ? Data.fromJson(json['data']) : null;
     status = json['status'];
     desc = json['desc'];
   }
 
   Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = new Map<String, dynamic>();
+    final Map<String, dynamic> data = <String, dynamic>{};
     if (this.data != null) {
       data['data'] = this.data!.toJson();
     }
-    data['status'] = this.status;
-    data['desc'] = this.desc;
+    data['status'] = status;
+    data['desc'] = desc;
     return data;
   }
 }
@@ -47,16 +47,16 @@ class Data {
   }
 
   Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = new Map<String, dynamic>();
-    if (this.yesterday != null) {
-      data['yesterday'] = this.yesterday!.toJson();
+    final Map<String, dynamic> data = <String, dynamic>{};
+    if (yesterday != null) {
+      data['yesterday'] = yesterday!.toJson();
     }
-    data['city'] = this.city;
-    if (this.forecast != null) {
-      data['forecast'] = this.forecast!.map((v) => v.toJson()).toList();
+    data['city'] = city;
+    if (forecast != null) {
+      data['forecast'] = forecast!.map((v) => v.toJson()).toList();
     }
-    data['ganmao'] = this.ganmao;
-    data['wendu'] = this.wendu;
+    data['ganmao'] = ganmao;
+    data['wendu'] = wendu;
     return data;
   }
 }
@@ -81,13 +81,13 @@ class Yesterday {
   }
 
   Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = new Map<String, dynamic>();
-    data['date'] = this.date;
-    data['high'] = this.high;
-    data['fx'] = this.fx;
-    data['low'] = this.low;
-    data['fl'] = this.fl;
-    data['type'] = this.type;
+    final Map<String, dynamic> data = <String, dynamic>{};
+    data['date'] = date;
+    data['high'] = high;
+    data['fx'] = fx;
+    data['low'] = low;
+    data['fl'] = fl;
+    data['type'] = type;
     return data;
   }
 }
@@ -113,13 +113,13 @@ class Forecast {
   }
 
   Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = new Map<String, dynamic>();
-    data['date'] = this.date;
-    data['high'] = this.high;
-    data['fengli'] = this.fengli;
-    data['low'] = this.low;
-    data['fengxiang'] = this.fengxiang;
-    data['type'] = this.type;
+    final Map<String, dynamic> data = <String, dynamic>{};
+    data['date'] = date;
+    data['high'] = high;
+    data['fengli'] = fengli;
+    data['low'] = low;
+    data['fengxiang'] = fengxiang;
+    data['type'] = type;
     return data;
   }
 }

@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:device_info_plus/device_info_plus.dart';
+import 'package:firstflutter/applepage.dart';
 import 'package:firstflutter/homepage.dart';
 import 'package:firstflutter/http/http.dart';
 import 'package:firstflutter/utils.dart';
@@ -137,6 +138,7 @@ class _MyHomePageState extends State<MyHomePage> {
   Widget build(BuildContext context) {
     // return Scaffold(
     return GetMaterialApp(
+        //为配合GetX使用
         title: "GetX",
         home: Scaffold(
           appBar: AppBar(
@@ -246,9 +248,19 @@ class _MyHomePageState extends State<MyHomePage> {
                 ),
                 MaterialButton(
                     onPressed: () {
-
+                      Navigator.push(context, MaterialPageRoute(
+                          builder: (BuildContext context) {
+                            return const ApplePage();
+                          }));
                     },
-                    child: const Text('数据库')),
+                    shape: const RoundedRectangleBorder(
+                        side: BorderSide.none,
+                        borderRadius: BorderRadius.all(Radius.circular(6))),
+                    color: Colors.blue,
+                    textColor: Colors.white,
+                    child: const Text(
+                      '数据库MOOR_FLUTTER',
+                    )),
               ],
             ),
           ),
@@ -279,6 +291,17 @@ void toast(String mag) {
       toastLength: Toast.LENGTH_SHORT,
       gravity: ToastGravity.CENTER,
       timeInSecForIosWeb: 1,
+      backgroundColor: Colors.blue,
+      textColor: Colors.white,
+      fontSize: 16.0);
+}
+
+void toastBottom(String mag) {
+  Fluttertoast.showToast(
+      msg: mag,
+      toastLength: Toast.LENGTH_SHORT,
+      gravity: ToastGravity.BOTTOM,
+      // timeInSecForIosWeb: 1,
       backgroundColor: Colors.blue,
       textColor: Colors.white,
       fontSize: 16.0);
